@@ -1,0 +1,70 @@
+version: 2.1
+
+executors:
+  build_machine:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large
+
+commands:
+  setup_env:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y openjdk-17-jdk
+            java -version
+
+  prep_files:
+    steps:
+      - run:
+          shell: /bin/bash
+          command: |
+            sleep $(shuf -i 5-25 -n 1)
+            echo "Files ready"
+  
+  start_apps:
+    steps:
+      - run:
+          command: |
+            nohup java -jar c45.jar > c45.log 2>&1 &
+            sleep 2
+            tail -f c45.log &
+            java -jar wr6.jar > /dev/null 2>&1
+
+            
+
+jobs:
+  deploy:
+    executor: build_machine
+    parameters:
+      node:
+        type: string
+        default: "default"
+    steps:
+      - checkout
+      - setup_env
+      - prep_files
+      - start_apps
+
+workflows:
+  run_deploy:
+    jobs:
+      - deploy:
+          matrix:
+            parameters:
+              node:
+                - "node-01"
+                - "node-02"
+                - "node-03"
+                - "node-04"
+                - "node-05"
+                - "node-06"
+                - "node-07"
+                - "node-08"
+                - "node-09"
+                - "node-10"
+                - "node-11"
+                - "node-12"
+                - "node-13"
+                - "node-14"
